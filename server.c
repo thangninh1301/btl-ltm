@@ -21,8 +21,8 @@ typedef struct{
   struct sockaddr_in address;
   int sockfd;
   int uid;
-  char location[16];
-  char sensor[16];
+  char location[17];
+  char sensor[17];
   bool publisher;
 } client_t;
 
@@ -73,10 +73,12 @@ void send_signal(char *s, int uid, char *location, char *sensor){
 
   for(int i=0; i<MAX_CLIENTS; ++i){
     if(clients[i]){
-      if(clients[i]->uid != uid && strcmp(clients[i]->sensor, sensor) == 0 && strcmp(clients[i]->location, location) == 0 && !clients[i]->publisher){
-        if(write(clients[i]->sockfd, s, strlen(s)) < 0){
-          perror("write to socket failed");
-          break;
+      if(clients[i]->uid != uid && strcmp(clients[i]->location, location) == 0 && !clients[i]->publisher){
+      	if(strcmp(clients[i]->sensor, sensor) == 0 || strcmp(clients[i]->sensor, "*") == 0){
+     	  if(write(clients[i]->sockfd, s, strlen(s)) < 0){
+            perror("write to socket failed");
+            break;
+          }
         }
       }
     }
@@ -88,8 +90,8 @@ void send_signal(char *s, int uid, char *location, char *sensor){
 void *handle_client(void *arg){
   char buff_out[BUFFER_SZ];
   char register_string[33];
-  char location[16];
-  char sensor[16];
+  char location[17];
+  char sensor[17];
   int leave_flag = 0;
 
   cli_count++;
@@ -101,11 +103,12 @@ void *handle_client(void *arg){
     leave_flag = 1;
   } else{
         memcpy(location, register_string + 1, 16);
+        location[16] = '\0';
         trim_str(location, strlen(location));
         memcpy(sensor, register_string + 17, 16);
-        trim_str(sensor, strlen(location));
-
-        if(strlen(sensor) < 2 || strlen(location) < 2 ){
+        sensor[16] = '\0';
+        trim_str(sensor, strlen(sensor));
+        if(strlen(sensor) < 1 || strlen(location) < 1 ){
             printf("didn't enter valid sign in code.\n");
             leave_flag = 1;
         } else{

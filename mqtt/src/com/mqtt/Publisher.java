@@ -22,7 +22,7 @@ public class Publisher {
     private JRadioButton publisherRadioButton;
     private JRadioButton subscriberRadioButton;
     private ClientMqtt clientMqtt = new ClientMqtt();
-
+    private String[] parts;
     public Publisher() {
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -47,7 +47,19 @@ public class Publisher {
                     clientMqtt.setPublisher(false);
                 }
 
-                clientMqtt.setTopic(tTopic.getText());
+                parts = tTopic.getText().split("/");
+
+                if (parts[1].length() == 0 || parts[2].length() == 0) {
+                    JOptionPane.showMessageDialog(null, "invalid topic");
+                    return;
+                }
+
+                int length = parts[1].length();
+                for (int i = 0; i < 16 - length; i++) {
+                    parts[1]+=' ';
+                }
+
+                clientMqtt.setTopic(parts[1] + parts[2]);
                 clientMqtt.setPort(Integer.parseInt(tPort.getText()));
                 clientMqtt.setOutput(output);
                 clientMqtt.setInput(input);
