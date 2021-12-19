@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="mqtt:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/mqtt_jar</output-path>
+    <root id="archive" name="mqtt.jar">
+      <element id="module-output" name="mqtt" />
+    </root>
+  </artifact>
+</component>
