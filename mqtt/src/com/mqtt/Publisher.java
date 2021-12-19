@@ -23,6 +23,7 @@ public class Publisher {
     private JRadioButton subscriberRadioButton;
     private ClientMqtt clientMqtt = new ClientMqtt();
     private String[] parts;
+
     public Publisher() {
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -45,6 +46,9 @@ public class Publisher {
                 if (subscriberRadioButton.isSelected()) {
                     sendButton.setVisible(false);
                     clientMqtt.setPublisher(false);
+                } else {
+                    sendButton.setVisible(true);
+                    clientMqtt.setPublisher(true);
                 }
 
                 parts = tTopic.getText().split("/");
@@ -56,7 +60,7 @@ public class Publisher {
 
                 int length = parts[1].length();
                 for (int i = 0; i < 16 - length; i++) {
-                    parts[1]+=' ';
+                    parts[1] += ' ';
                 }
 
                 clientMqtt.setTopic(parts[1] + parts[2]);
@@ -87,6 +91,14 @@ public class Publisher {
             }
         });
 
+        input.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (input.getText().length() >= 1000) {// limit textfield to 1000 characters
+                    e.consume();
+                }
+            }
+        });
     }
 
     public static void main(String[] args) {

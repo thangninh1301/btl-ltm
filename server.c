@@ -98,10 +98,14 @@ void *handle_client(void *arg){
   client_t *cli = (client_t *)arg;
 
   // topic
+  bzero(register_string, 33);
   if(recv(cli->sockfd, register_string, 33, 0) <= 0 || strlen(register_string) <  2 || strlen(register_string) > 33){
     printf("didn't enter valid sign in code.\n");
     leave_flag = 1;
   } else{
+  	bzero(location, 17);
+  	bzero(sensor, 17);
+  	
         memcpy(location, register_string + 1, 16);
         location[16] = '\0';
         trim_str(location, strlen(location));
@@ -118,11 +122,9 @@ void *handle_client(void *arg){
             if (register_string[0] == '1') {
                 cli->publisher = true;
                 printf("publisher has joined with topic /%s/%s.\n", cli->location, cli->sensor);
-                send_signal("publisher has joined\n", cli->uid, cli->location, cli->sensor);
             } else {
                 cli->publisher = false;
                 printf("subscriber has joined with topic /%s/%s.\n", cli->location, cli->sensor);
-                send_signal("subscriber has joined\n", cli->uid, cli->location, cli->sensor);
             }
         }
   }
@@ -148,9 +150,14 @@ void *handle_client(void *arg){
         printf("%s -> /%s/%s\n", buff_out, cli->location, cli->sensor);
       }
     } else if (receive == 0 || strcmp(buff_out, "exit") == 0){
-      sprintf(buff_out, "/%s/%s has left\n", cli->location, cli->sensor);
+      if (cli->publisher) {
+        cli->publisher = true;
+        printf("publisher has left topic /%s/%s.\n", cli->location, cli->sensor);
+      } else {
+        cli->publisher = false;
+        printf("subscriber has left topic /%s/%s.\n", cli->location, cli->sensor);
+      }
       printf("%s", buff_out);
-      send_signal(buff_out, cli->uid, cli->location, cli->sensor);
       leave_flag = 1;
     } else {
       printf("ERROR: -1\n");
